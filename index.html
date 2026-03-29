@@ -1,85 +1,9 @@
 /* ═══════════════════════════════════════════
-   YOVEX AI - REAL API CONNECTION
+   YOVEX AI - FINAL PRODUCTION BRIDGE
 ═══════════════════════════════════════════ */
 
-// رابط المحرك الخاص بك على Hugging Face
-const HF_API_ENDPOINT = "https://yousefjoo131-yovex-ai-train.hf.space/api/predict";
-
-// 1. نظام الدخول (كود: 123456)
-function verifyCode() {
-    const inputs = document.querySelectorAll('.code-input');
-    let code = "";
-    inputs.forEach(input => code += input.value);
-
-    if(code === "123456" || code.length === 6) {
-        toast('🚀', 'SYSTEM READY', 'AI Engine Connected Successfully.');
-        document.querySelector('.auth-container').style.display = 'none';
-        const app = document.querySelector('.app-container');
-        app.style.visibility = 'visible';
-        app.style.opacity = '1';
-    } else {
-        toast('❌', 'DENIED', 'Invalid Access Code.');
-    }
-}
-
-// 2. وظيفة المعالجة الحقيقية (إرسال الملف للسيرفر)
-async function startAIProcess(taskType) {
-    // إنشاء عنصر اختيار ملف مخفي لتسهيل التجربة
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'audio/*';
-    
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
-
-        toast('⚙️', 'AI ENGINE', `Uploading ${file.name}...`);
-        
-        // تجهيز البيانات لإرسالها لـ Hugging Face
-        const reader = new FileReader();
-        reader.onload = async () => {
-            try {
-                const response = await fetch(HF_API_ENDPOINT, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [{ "name": file.name, "data": reader.result }]
-                    })
-                });
-
-                const result = await response.json();
-                toast('✨', 'SUCCESS', `${taskType} Completed!`);
-                alert("تمت المعالجة بنجاح! في النسخة الكاملة ستحصل على رابط التحميل هنا.");
-            } catch (err) {
-                toast('⚠️', 'ERROR', 'Check if Space is "Running" on HF.');
-            }
-        };
-        reader.readAsDataURL(file);
-    };
-    input.click();
-}
-
-// ربط الأزرار عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    // زر الدخول
-    const loginBtn = document.querySelector('.btn-primary');
-    if(loginBtn) loginBtn.onclick = verifyCode;
-
-    // أزرار الكروت (Train / Cover)
-    document.querySelectorAll('.card-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const task = btn.closest('.card').querySelector('h3').textContent;
-            startAIProcess(task);
-        };
-    });
-});
-/* ═══════════════════════════════════════════
-   YOVEX AI - PRODUCTION BRIDGE (REAL API)
-═══════════════════════════════════════════ */
-
-// ده رابط المحرك بتاعك اللي شغال دلوقتي على Hugging Face
-const API_URL = "https://yousefjoo131-yovex-ai-train.hf.space/api/predict";
+// رابط الـ API الخاص بـ Space بتاعك
+const HF_SPACE_URL = "https://yousefjoo131-yovex-ai-train.hf.space/api/predict";
 
 // 1. نظام الدخول (الكود: 123456)
 function verifyCode() {
@@ -88,67 +12,72 @@ function verifyCode() {
     inputs.forEach(input => code += input.value);
 
     if(code === "123456" || code.length === 6) {
-        toast('🚀', 'SYSTEM ONLINE', 'AI Engine Connected.');
+        toast('🔓', 'ACCESS GRANTED', 'AI Core Synchronized.');
         document.querySelector('.auth-container').style.display = 'none';
         const app = document.querySelector('.app-container');
         app.style.visibility = 'visible';
         app.style.opacity = '1';
     } else {
-        toast('❌', 'ERROR', 'Invalid Access Code.');
+        toast('❌', 'DENIED', 'Invalid Security Code.');
     }
 }
 
-// 2. وظيفة المعالجة الحقيقية (ارسال الصوت للسيرفر)
-async function startProcess(taskType) {
-    // فتح نافذة اختيار ملف
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'audio/*';
+// 2. دالة المعالجة الحقيقية (ارسال الصوت للسيرفر)
+async function startAIProcess(taskName) {
+    // إنشاء زر رفع ملف مخفي
+    const fileSelector = document.createElement('input');
+    fileSelector.type = 'file';
+    fileSelector.accept = 'audio/*';
 
-    input.onchange = async () => {
-        const file = input.files[0];
+    fileSelector.onchange = async () => {
+        const file = fileSelector.files[0];
         if(!file) return;
 
-        toast('⚙️', 'AI ENGINE', `Uploading ${file.name}...`);
-
+        toast('⚙️', 'AI ENGINE', `Processing ${file.name}...`);
+        
+        // تحويل الملف لـ Blob عشان نبعته للـ API
         const reader = new FileReader();
         reader.onload = async () => {
             try {
-                // إرسال الملف لمحرك Hugging Face
-                const response = await fetch(API_URL, {
+                const response = await fetch(HF_SPACE_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ data: [reader.result] })
+                    body: JSON.stringify({
+                        data: [{ "name": file.name, "data": reader.result }]
+                    })
                 });
 
                 const result = await response.json();
                 
-                if(result.data) {
-                    toast('✅', 'SUCCESS', `${taskType} Done!`);
-                    // تشغيل الصوت اللي رجع من الذكاء الاصطناعي
-                    const audio = new Audio(result.data[0]);
-                    audio.play();
-                    alert("تمت المعالجة بنجاح! اسمع النتيجة الآن.");
+                if (result.data) {
+                    toast('✨', 'SUCCESS', `${taskName} Completed!`);
+                    // تشغيل الصوت اللي راجع من السيرفر
+                    const audioOut = new Audio(result.data[0].url);
+                    audioOut.play();
+                    alert("الذكاء الاصطناعي خلص! اسمع النتيجة دلوقتي.");
                 }
             } catch (err) {
-                toast('⚠️', 'OFFLINE', 'Check your Hugging Face Space status.');
+                toast('⚠️', 'ERROR', 'Check if Space is Running.');
+                console.error(err);
             }
         };
         reader.readAsDataURL(file);
     };
-    input.click();
+    fileSelector.click();
 }
 
-// ربط الأزرار
+// ربط الأزرار عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
+    // زر الدخول
     const loginBtn = document.querySelector('.btn-primary');
     if(loginBtn) loginBtn.onclick = verifyCode;
 
+    // أزرار الكروت (Train / Cover / Mastering)
     document.querySelectorAll('.card-btn').forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
             const title = btn.closest('.card').querySelector('h3').textContent;
-            startProcess(title);
+            startAIProcess(title);
         };
     });
 });
